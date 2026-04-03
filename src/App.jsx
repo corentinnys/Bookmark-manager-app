@@ -6,6 +6,10 @@ import Auth from "./Auth";
 import { auth } from "./firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import './App.css';
+import data from "./data/data.json";
+import { saveBookmarksForUser } from "./firebase/bookmarks";
+import Dashboard from "./Dashboard";
+
 
 function App() {
     const [user, setUser] = useState(null);
@@ -41,15 +45,21 @@ function App() {
                 <h2>Bienvenue, {user.email}</h2>
                 <button className="btn btn-danger" onClick={handleLogout}>Se déconnecter</button>
             </div>
-
-            <div className="row">
+            <button
+                className="btn btn-success"
+                onClick={() => saveBookmarksForUser(auth.currentUser.uid, data.bookmarks)}
+            >
+                Ajouter données Firebase
+            </button>
+            <Dashboard user={user} />
+           {/* <div className="row">
                 <section className="col-3">
                     <Tags selectedTags={selectedTags} setSelectedTags={setSelectedTags} />
                 </section>
                 <section className="col-9">
                     <Cards selectedTags={selectedTags} />
                 </section>
-            </div>
+            </div>*/}
         </div>
     );
 }
