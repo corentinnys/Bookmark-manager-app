@@ -1,6 +1,8 @@
 // src/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import { getBookmarksForUser } from "./firebase/bookmarks";
+import { deleteDoc, doc } from "firebase/firestore";
+import { db } from "./firebaseConfig";
 import Tags from "./Tags";
 import Card from "./card";
 
@@ -27,6 +29,14 @@ export default function Dashboard({ user }) {
         setBookmarks(prev =>
             prev.map(item => item.id === updatedBookmark.id ? updatedBookmark : item)
         );
+    };
+    const handleDelete = async (id) => {
+        try {
+            await deleteDoc(doc(db, "bookmarks", id));
+            setBookmarks(prev => prev.filter(bm => bm.id !== id));
+        } catch (e) {
+            console.error("Erreur suppression :", e);
+        }
     };
     // Filtrer les bookmarks si des tags sont sélectionnés
     const filteredBookmarks = selectedTags.length > 0
@@ -55,7 +65,8 @@ export default function Dashboard({ user }) {
                                 key={bm.id}
                                 card={bm}
                                 onEdit={handleSave}
-                                onSave={handleSave}  // ← manquait
+                                onSave={handleSave}
+                                onDelete={handleDelete} // ← manquait
                             />
                         ))}
                     </div>

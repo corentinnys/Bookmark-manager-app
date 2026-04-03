@@ -25,6 +25,7 @@ function Card({ card, index,onEdit,onDelete,onSave  }) {
 
     const handleDelete = (e) => {
         e.stopPropagation();
+        onDelete(card.id);
         console.log("Supprimer", card.title);
     };
 
