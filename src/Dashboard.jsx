@@ -1,9 +1,12 @@
 // src/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import { getBookmarksForUser } from "./firebase/bookmarks";
+import Tags from "./Tags";
+import Card from "./card";
 
 export default function Dashboard({ user }) {
     const [bookmarks, setBookmarks] = useState([]);
+    const [selectedTags, setSelectedTags] = useState([]);
 
     useEffect(() => {
         const fetchBookmarks = async () => {
@@ -20,49 +23,43 @@ export default function Dashboard({ user }) {
 
         fetchBookmarks();
     }, [user]);
-
-    if (!bookmarks.length) {
-        return <p className="text-center mt-5">Aucun bookmark pour le moment...</p>;
-    }
+    const handleSave = (updatedBookmark) => {
+        setBookmarks(prev =>
+            prev.map(item => item.id === updatedBookmark.id ? updatedBookmark : item)
+        );
+    };
+    // Filtrer les bookmarks si des tags sont sélectionnés
+    const filteredBookmarks = selectedTags.length > 0
+        ? bookmarks.filter(bm => bm.tags?.some(tag => selectedTags.includes(tag)))
+        : bookmarks;
 
     return (
         <div className="container my-5">
             <h2 className="mb-4 text-center">Mes Bookmarks</h2>
+
             <div className="row">
-                {bookmarks.map((bm) => (
-                    <div className="col-md-4 mb-4" key={bm.id}>
-                        <div className="card h-100 shadow-sm rounded-4">
+                {/* Colonne tags */}
+                <div className="col-md-3 mb-4">
+                    <Tags selectedTags={selectedTags} setSelectedTags={setSelectedTags} />
+                </div>
 
-                            {/* Favicon */}
-                            <div className="text-center mt-3">
-                                <img src={bm.favicon} alt={bm.title} width="40" />
-                            </div>
+                {/* Colonne cartes */}
+                <div className="col-md-9">
+                    <div className="row">
+                        {filteredBookmarks.length === 0 && (
+                            <p className="text-center">Aucun bookmark pour ces tags.</p>
+                        )}
 
-                            <div className="card-body text-center">
-                                <h5 className="card-title">{bm.title}</h5>
-                                <p className="card-text">{bm.description}</p>
-
-                                {/* Tags */}
-                                <div className="mb-2">
-                                    {bm.tags?.map((tag, idx) => (
-                                        <span key={idx} className="badge bg-primary me-1">
-                                            {tag}
-                                        </span>
-                                    ))}
-                                </div>
-
-                                <a
-                                    href={bm.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="btn btn-primary btn-sm"
-                                >
-                                    Visiter
-                                </a>
-                            </div>
-                        </div>
+                        {filteredBookmarks.map((bm) => (
+                            <Card
+                                key={bm.id}
+                                card={bm}
+                                onEdit={handleSave}
+                                onSave={handleSave}  // ← manquait
+                            />
+                        ))}
                     </div>
-                ))}
+                </div>
             </div>
         </div>
     );

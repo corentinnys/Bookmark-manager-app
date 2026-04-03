@@ -14,6 +14,7 @@ import Dashboard from "./Dashboard";
 function App() {
     const [user, setUser] = useState(null);
     const [selectedTags, setSelectedTags] = useState([]);
+    const [bookmarks, setBookmarks] = useState([]);
 
     // Surveille l'état de connexion Firebase
     useEffect(() => {
@@ -22,7 +23,16 @@ function App() {
         });
         return () => unsubscribe();
     }, []);
+   // ← plus de données hardcodées
 
+    useEffect(() => {
+        const fetchBookmarks = async () => {
+            const snapshot = await getDocs(collection(db, "bookmarks"));
+            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setBookmarks(data);
+        };
+        fetchBookmarks();
+    }, []);
     // Déconnexion
     const handleLogout = async () => {
         try {

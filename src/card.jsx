@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
+import ModalBox from "./ModalBox";
 
 
-function Card({ card, index }) {
+function Card({ card, index,onEdit,onDelete,onSave  }) {
     const [open, setOpen] = useState(false);
     const menuRef = useRef(null);
-
+    const [showModal, setShowModal] = useState(false);
+    const [selectedBookmark, setSelectedBookmark] = useState(null);
     useEffect(() => {
         function handleClickOutside(e) {
             if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -17,7 +19,8 @@ function Card({ card, index }) {
 
     const handleEdit = (e) => {
         e.stopPropagation();
-        console.log("Modifier", card.title);
+        setSelectedBookmark(card); // ← initialise selectedBookmark avec la carte
+        setShowModal(true);
     };
 
     const handleDelete = (e) => {
@@ -31,6 +34,7 @@ function Card({ card, index }) {
     };
 
     return (
+        <>
         <div className="col-lg-4 col-md-6 mb-4 d-flex">
             <div className="card custom-card w-100 text-center p-4">
 
@@ -53,7 +57,12 @@ function Card({ card, index }) {
 
                     {open && (
                         <div className="custom-dropdown">
-                            <button onClick={handleEdit}>Modifier</button>
+                            <button
+                                className="btn btn-warning btn-sm"
+                                onClick={(e) => handleEdit(e, card)}
+                            >
+                                Modifier
+                            </button>
                             <button onClick={handleDelete}>Supprimer</button>
                             <button onClick={handleVisit}>Visiter</button>
                         </div>
@@ -78,6 +87,14 @@ function Card({ card, index }) {
 
             </div>
         </div>
+    {showModal && <ModalBox
+        showModal={showModal}
+        setShowModal={setShowModal}
+        selectedBookmark={selectedBookmark}
+        setSelectedBookmark={setSelectedBookmark}
+        onSave={ onSave }  // ← prop directement, sans wrapper
+    />}
+        </>
     );
 }
 

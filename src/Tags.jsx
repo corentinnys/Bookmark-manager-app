@@ -23,7 +23,7 @@ function Tags({ selectedTags, setSelectedTags }) {
     return (
 
 
-        <div>
+        <div className="col-3">
             <h1 className="heading-1">Bookmark Manager</h1>
             <div className="list-group">
 
