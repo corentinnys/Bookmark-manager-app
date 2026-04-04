@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Tags from "./Tags";
+
 import Cards from "./cards";
 import Auth from "./Auth";
 import { auth } from "./firebaseConfig";
@@ -44,7 +44,8 @@ function App() {
         }
     };
     const handleAdd = () => {
-        setSelectedBookmark({ title: "", url: "", description: "", tags: [] }); // ← bookmark vide
+        setSelectedBookmark({ title: "", url: "", description: "", tags: [], favicon: "", userId: user.uid });
+        // ← bookmark vide
         setShowModal(true);
     };
 
@@ -64,12 +65,7 @@ function App() {
             <button className="btn btn-primary"  onClick={handleAdd}>
                 + Ajouter
             </button>
-            <button
-                className="btn btn-success"
-                onClick={() => saveBookmarksForUser(auth.currentUser.uid, data.bookmarks)}
-            >
-                Ajouter données Firebase
-            </button>
+
             <Dashboard user={user} />
            {/* <div className="row">
                 <section className="col-3">

@@ -1,88 +1,207 @@
-.heading-1{
-    font-size: 1.5rem ;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: #eef2f0; }
+
+/* ===== LAYOUT PRINCIPAL ===== */
+.bm-layout {
+    display: flex;
+    min-height: 100vh;
 }
-.custom-card {
-    border: none;
-    border-radius: 15px;
+
+/* ===== SIDEBAR ===== */
+.bm-sidebar {
+    width: 260px;
+    flex-shrink: 0;
     background: white;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
+    border-right: 1px solid #e4e9e7;
+    padding: 24px 16px;
 }
 
-.custom-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+/* ===== MAIN ===== */
+.bm-main {
+    flex: 1;
+    padding: 24px;
+    min-width: 0;
 }
 
-.custom-card hr {
-    border-top: 1px solid #eee;
+/* ===== TOPBAR ===== */
+.bm-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
 }
 
-.tag-badge {
-    background-color: #f1f3f5;
-    color: #555;
-    padding: 5px 10px;
-    font-size: 11px;
-    border-radius: 999px;
-    border: 1px solid #e0e0e0;
-}
-
-
-.menu-btn {
-    background: none;
-    border: none;
+.bm-section-title {
     font-size: 20px;
-    cursor: pointer;
+    font-weight: 600;
+    color: #1a1a1a;
 }
 
-/* IMPORTANT: éviter que Bootstrap coupe le menu */
-.custom-card {
-    position: relative;
-    overflow: visible;
-}
-
-/* Position du menu */
-.menu {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
-
-/* Bouton ⋮ */
-.menu-btn {
-    background: none;
+.bm-add-btn {
+    background: #1a9a80;
+    color: white;
     border: none;
-    font-size: 1.5rem;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
+    font-family: 'Inter', sans-serif;
+}
+.bm-add-btn:hover { background: #158a70; }
+
+/* ===== GRID ===== */
+.bookmarks-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+@media (max-width: 1100px) { .bookmarks-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 700px)  { .bookmarks-grid { grid-template-columns: 1fr; } }
+
+/* ===== CARD ===== */
+.bookmark-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e4e9e7;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
 }
 
-/* Dropdown custom */
-.custom-dropdown {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background-color: white;
-    border: 1px solid #ddd;
+/* ===== CARD HEADER ===== */
+.bm-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.bm-favicon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.bm-favicon-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #eef2f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.bm-meta { flex: 1; min-width: 0; }
+
+.bm-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bm-url {
+    font-size: 12px;
+    color: #8a9a95;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bm-dots {
+    width: 28px;
+    height: 28px;
     border-radius: 6px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    z-index: 9999;
-    min-width: 140px;
+    border: 1px solid #e4e9e7;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    color: #666;
+    font-size: 18px;
+    line-height: 1;
+}
+.bm-dots:hover { background: #f5f5f5; }
+
+/* ===== DIVIDER ===== */
+.bm-divider {
+    height: 1px;
+    background: #f0f4f2;
+    margin: 0 -20px;
+}
+
+/* ===== DESCRIPTION ===== */
+.bm-desc {
+    font-size: 13px;
+    color: #4a5a55;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
     overflow: hidden;
 }
 
-/* Boutons du menu */
-.custom-dropdown button {
-    display: block;
-    width: 100%;
-    padding: 10px 12px;
-    border: none;
-    background: white;
-    text-align: left;
-    cursor: pointer;
-    font-size: 0.9rem;
+/* ===== TAGS ===== */
+.bm-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.bm-tag {
+    font-size: 11px;
+    font-weight: 500;
+    color: #4a5a55;
+    background: #eef2f0;
+    padding: 4px 10px;
+    border-radius: 6px;
 }
 
-/* Hover effet */
-.custom-dropdown button:hover {
-    background-color: #f5f5f5;
+/* ===== FOOTER ===== */
+.bm-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+}
+
+.bm-stats { display: flex; align-items: center; gap: 12px; }
+
+.bm-stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #8a9a95;
+}
+.bm-stat svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+.bm-bookmark {
+    color: #8a9a95;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    display: flex;
+}
+.bm-bookmark svg { width: 14px; height: 14px; }
+.bm-bookmark:hover { color: #1a9a80; }
+
+/* ===== SIDEBAR HEADINGS ===== */
+.heading-1 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #8a9a95;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
 }

@@ -1,120 +1,108 @@
-// src/Dashboard.jsx
 import React, { useEffect, useState } from "react";
-import { getBookmarksForUser } from "./firebase/bookmarks";
-import { deleteDoc, doc,addDoc,collection } from "firebase/firestore";
+import { collection, onSnapshot, deleteDoc, doc } from "firebase/firestore";
 import { db } from "./firebaseConfig";
+import ModalBox from "./ModalBox";
 import Tags from "./Tags";
-import Card from "./card";
 import AddModal from "./AddModal";
+import Card from "./card";
 
-
-export default function Dashboard({ user }) {
+function Dashboard({ user }) {
     const [bookmarks, setBookmarks] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [selectedBookmark, setSelectedBookmark] = useState(null);
     const [selectedTags, setSelectedTags] = useState([]);
-    const [showAddModal, setShowAddModal] = useState(false);
+    const [modalType, setModalType] = useState(null);
+    const filteredBookmarks = selectedTags.length === 0
+        ? bookmarks
+        : bookmarks.filter(b => selectedTags.every(tag => b.tags?.includes(tag)));
 
     useEffect(() => {
-        const fetchBookmarks = async () => {
-            if (!user) return;
-
-            try {
-                const data = await getBookmarksForUser(user.uid);
-                console.log("Bookmarks récupérés :", data);
-                setBookmarks(data);
-            } catch (error) {
-                console.error("Erreur récupération bookmarks :", error);
-            }
-        };
-
-        fetchBookmarks();
+        if (!user) return;
+        const unsubscribe = onSnapshot(collection(db, "bookmarks"), (snapshot) => {
+            const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            setBookmarks(data);
+        });
+        return () => unsubscribe();
     }, [user]);
-    const handleSave = async (bookmark) => {
-        try {
-            // 👉 CAS 1 : UPDATE
-            if (bookmark.id) {
-                const ref = doc(db, "bookmarks", bookmark.id);
-                await updateDoc(ref, bookmark);
 
-                setBookmarks(prev =>
-                    prev.map(item =>
-                        item.id === bookmark.id ? bookmark : item
-                    )
-                );
-            }
-
-            // 👉 CAS 2 : CREATE
-            else {
-                const docRef = await addDoc(collection(db, "bookmarks"), {
-                    ...bookmark,
-                    userId: user.uid
-                });
-
-                setBookmarks(prev => [
-                    ...prev,
-                    { id: docRef.id, ...bookmark }
-                ]);
-            }
-
-            setShowAddModal(false);
-        } catch (error) {
-            console.error("Erreur sauvegarde :", error);
-        }
+    const handleAdd = () => {
+        setSelectedBookmark({
+            title: "",
+            url: "",
+            description: "",
+            tags: [],
+            favicon: "",
+            userId: user.uid
+        });
+        setModalType("add");
     };
+
+    const handleEdit = (bookmark) => {
+        setSelectedBookmark(bookmark);
+        setModalType("edit");
+    };
+
     const handleDelete = async (id) => {
-        try {
-            await deleteDoc(doc(db, "bookmarks", id));
-            setBookmarks(prev => prev.filter(bm => bm.id !== id));
-        } catch (e) {
-            console.error("Erreur suppression :", e);
-        }
+        try { await deleteDoc(doc(db, "bookmarks", id)); }
+        catch (error) { console.error("Erreur suppression :", error); }
     };
-    // Filtrer les bookmarks si des tags sont sélectionnés
-    const filteredBookmarks = selectedTags.length > 0
-        ? bookmarks.filter(bm => bm.tags?.some(tag => selectedTags.includes(tag)))
-        : bookmarks;
+
+    const handleSave = (updatedBookmark) => {
+        console.log("Bookmark sauvegardé :", updatedBookmark);
+    };
 
     return (
-        <div className="container my-5">
-            <h2 className="mb-4 text-center">Mes Bookmarks</h2>
+        <div className="bm-layout">
 
-            <div className="row">
-                {/* Colonne tags */}
-                <div className="col-md-3 mb-4">
-                    <Tags selectedTags={selectedTags} setSelectedTags={setSelectedTags} />
+            {/* SIDEBAR */}
+            <aside className="bm-sidebar">
+                <Tags selectedTags={selectedTags} setSelectedTags={setSelectedTags} />
+            </aside>
+
+            {/* MAIN */}
+            <main className="bm-main">
+                <div className="bm-topbar">
+                    <h2 className="bm-section-title">All bookmarks</h2>
+                    <button className="bm-add-btn" onClick={handleAdd}>+ Add Bookmark</button>
                 </div>
 
-                {/* Colonne cartes */}
-                <div className="col-md-9">
-                    <button
-                        className="btn btn-success"
-                        onClick={() => setShowAddModal(true)}
-                    >
-                        Ajouter
-                    </button>
-                    <div className="row">
-                        {filteredBookmarks.length === 0 && (
-                            <p className="text-center">Aucun bookmark pour ces tags.</p>
-                        )}
-
-                        {filteredBookmarks.map((bm) => (
+                <div className="bookmarks-grid">
+                    {filteredBookmarks.map((bookmark, index) => (
+                        <div className="bookmark-card" key={`${bookmark.id}-${index}`}>
                             <Card
-                                key={bm.id}
-                                card={bm}
-                                onEdit={handleSave}
+                                card={bookmark}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
                                 onSave={handleSave}
-                                onDelete={handleDelete} // ← manquait
                             />
-                        ))}
-                    </div>
+                            {/* Header */}
+
+
+
+
+                        </div>
+                    ))}
                 </div>
-            </div>
-            {showAddModal && (
+            </main>
+
+            {modalType === "add" && (
                 <AddModal
-                    show={showAddModal}
-                    onClose={() => setShowAddModal(false)}
+                    onClose={() => setModalType(null)}
+                    onSave={handleSave}
+                />
+            )}
+
+            {modalType === "edit" && (
+                <ModalBox
+                    showModal={true}
+                    setShowModal={() => setModalType(null)}
+                    selectedBookmark={selectedBookmark}
+                    setSelectedBookmark={setSelectedBookmark}
                     onSave={handleSave}
                 />
             )}
         </div>
     );
 }
+
+export default Dashboard;

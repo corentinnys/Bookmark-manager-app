@@ -21,9 +21,7 @@ function Tags({ selectedTags, setSelectedTags }) {
         }
     };
     return (
-
-
-        <div className="col-3">
+      <>
             <h1 className="heading-1">Bookmark Manager</h1>
             <div className="list-group">
 
@@ -50,7 +48,8 @@ function Tags({ selectedTags, setSelectedTags }) {
             ) : (
                 <p>Chargement...</p>
             )}
-        </div>
+      </>
+
     );
 }
 

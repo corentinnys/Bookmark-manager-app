@@ -7,6 +7,7 @@ function Card({ card, index,onEdit,onDelete,onSave  }) {
     const menuRef = useRef(null);
     const [showModal, setShowModal] = useState(false);
     const [selectedBookmark, setSelectedBookmark] = useState(null);
+
     useEffect(() => {
         function handleClickOutside(e) {
             if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -17,10 +18,13 @@ function Card({ card, index,onEdit,onDelete,onSave  }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+   /* const handleEdit = (e) => {
+        e.stopPropagation();
+        onEdit(card);
+    };*/
     const handleEdit = (e) => {
         e.stopPropagation();
-        setSelectedBookmark(card); // ← initialise selectedBookmark avec la carte
-        setShowModal(true);
+        onEdit(card);
     };
 
     const handleDelete = (e) => {
@@ -36,15 +40,16 @@ function Card({ card, index,onEdit,onDelete,onSave  }) {
 
     return (
         <>
-        <div className="col-lg-4 col-md-6 mb-4 d-flex">
-            <div className="card custom-card w-100 text-center p-4">
-
-                {/* Logo */}
-                <div className="mb-3">
-                    <img src={card.favicon} alt={card.title} style={{ width: "50px" }} />
+            <div className="bm-head">
+                {card.favicon
+                    ? <img className="bm-favicon" src={card.favicon} alt="" />
+                    : <div className="bm-favicon-placeholder">🔖</div>
+                }
+                <div className="bm-meta">
+                    <div className="bm-title">{card.title}</div>
+                    <div className="bm-url">{card.url}</div>
                 </div>
 
-                {/* MENU */}
                 <div className="menu" ref={menuRef}>
                     <button
                         className="menu-btn"
@@ -58,43 +63,59 @@ function Card({ card, index,onEdit,onDelete,onSave  }) {
 
                     {open && (
                         <div className="custom-dropdown">
-                            <button
-                                className="btn btn-warning btn-sm"
-                                onClick={(e) => handleEdit(e, card)}
-                            >
-                                Modifier
-                            </button>
+                            <button onClick={handleEdit}>Modifier</button>
                             <button onClick={handleDelete}>Supprimer</button>
                             <button onClick={handleVisit}>Visiter</button>
                         </div>
                     )}
                 </div>
 
-                <h5 className="fw-bold mb-2">{card.title}</h5>
+            </div>
+            <div className="bm-divider" />
 
-                <p className="text-muted small mb-3">
-                    {card.description}
-                </p>
+            {card.description && <p className="bm-desc">{card.description}</p>}
 
-                <hr />
-
-                <div className="d-flex justify-content-center flex-wrap gap-2 mt-2">
-                    {card.tags?.map((tag, i) => (
-                        <span key={i} className="badge tag-badge">
-                            {tag}
-                        </span>
+            {card.tags?.length > 0 && (
+                <div className="bm-tags">
+                    {card.tags.map(tag => (
+                        <span key={tag} className="bm-tag">{tag}</span>
                     ))}
                 </div>
+            )}
 
+            <div className="bm-footer">
+                <div className="bm-stats">
+                                    <span className="bm-stat">
+                                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z"/><circle cx="8" cy="8" r="2"/></svg>
+                                        {card.views ?? 0}
+                                    </span>
+                    <span className="bm-stat">
+                                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+                        {card.lastVisited ?? 'Never'}
+                                    </span>
+                    <span card="bm-stat">
+                                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 2v2M11 2v2M2 7h12"/></svg>
+                        {card.createdAt ?? '—'}
+                                    </span>
+                </div>
+                <button className="bm-bookmark" onClick={() => handleDelete(card.id)}>
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 2h8a1 1 0 011 1v10l-5-3-5 3V3a1 1 0 011-1z"/></svg>
+                </button>
             </div>
-        </div>
-    {showModal && <ModalBox
-        showModal={showModal}
-        setShowModal={setShowModal}
-        selectedBookmark={selectedBookmark}
-        setSelectedBookmark={setSelectedBookmark}
-        onSave={ onSave }  // ← prop directement, sans wrapper
-    />}
+
+
+
+
+
+                  {/*  */}
+
+    {/*{showModal && <ModalBox*/}
+    {/*    showModal={showModal}*/}
+    {/*    setShowModal={setShowModal}*/}
+    {/*    selectedBookmark={selectedBookmark}*/}
+    {/*    setSelectedBookmark={setSelectedBookmark}*/}
+    {/*    onSave={ onSave }  // ← prop directement, sans wrapper*/}
+    {/*/>}*/}
         </>
     );
 }
