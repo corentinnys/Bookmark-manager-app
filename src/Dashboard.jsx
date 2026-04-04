@@ -1,14 +1,17 @@
 // src/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import { getBookmarksForUser } from "./firebase/bookmarks";
-import { deleteDoc, doc } from "firebase/firestore";
+import { deleteDoc, doc,addDoc,collection } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 import Tags from "./Tags";
 import Card from "./card";
+import AddModal from "./AddModal";
+
 
 export default function Dashboard({ user }) {
     const [bookmarks, setBookmarks] = useState([]);
     const [selectedTags, setSelectedTags] = useState([]);
+    const [showAddModal, setShowAddModal] = useState(false);
 
     useEffect(() => {
         const fetchBookmarks = async () => {
@@ -25,10 +28,37 @@ export default function Dashboard({ user }) {
 
         fetchBookmarks();
     }, [user]);
-    const handleSave = (updatedBookmark) => {
-        setBookmarks(prev =>
-            prev.map(item => item.id === updatedBookmark.id ? updatedBookmark : item)
-        );
+    const handleSave = async (bookmark) => {
+        try {
+            // 👉 CAS 1 : UPDATE
+            if (bookmark.id) {
+                const ref = doc(db, "bookmarks", bookmark.id);
+                await updateDoc(ref, bookmark);
+
+                setBookmarks(prev =>
+                    prev.map(item =>
+                        item.id === bookmark.id ? bookmark : item
+                    )
+                );
+            }
+
+            // 👉 CAS 2 : CREATE
+            else {
+                const docRef = await addDoc(collection(db, "bookmarks"), {
+                    ...bookmark,
+                    userId: user.uid
+                });
+
+                setBookmarks(prev => [
+                    ...prev,
+                    { id: docRef.id, ...bookmark }
+                ]);
+            }
+
+            setShowAddModal(false);
+        } catch (error) {
+            console.error("Erreur sauvegarde :", error);
+        }
     };
     const handleDelete = async (id) => {
         try {
@@ -55,6 +85,12 @@ export default function Dashboard({ user }) {
 
                 {/* Colonne cartes */}
                 <div className="col-md-9">
+                    <button
+                        className="btn btn-success"
+                        onClick={() => setShowAddModal(true)}
+                    >
+                        Ajouter
+                    </button>
                     <div className="row">
                         {filteredBookmarks.length === 0 && (
                             <p className="text-center">Aucun bookmark pour ces tags.</p>
@@ -72,6 +108,13 @@ export default function Dashboard({ user }) {
                     </div>
                 </div>
             </div>
+            {showAddModal && (
+                <AddModal
+                    show={showAddModal}
+                    onClose={() => setShowAddModal(false)}
+                    onSave={handleSave}
+                />
+            )}
         </div>
     );
 }

@@ -9,7 +9,8 @@ import './App.css';
 import data from "./data/data.json";
 import { saveBookmarksForUser } from "./firebase/bookmarks";
 import Dashboard from "./Dashboard";
-
+import { getDocs, collection } from "firebase/firestore";
+import { db } from "./firebaseConfig"
 
 function App() {
     const [user, setUser] = useState(null);
@@ -42,6 +43,10 @@ function App() {
             console.error("Erreur déconnexion :", error);
         }
     };
+    const handleAdd = () => {
+        setSelectedBookmark({ title: "", url: "", description: "", tags: [] }); // ← bookmark vide
+        setShowModal(true);
+    };
 
     // Si l'utilisateur n'est pas connecté → afficher Auth
     if (!user) {
@@ -50,11 +55,15 @@ function App() {
 
     // Sinon → afficher l'interface principale
     return (
+
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h2>Bienvenue, {user.email}</h2>
                 <button className="btn btn-danger" onClick={handleLogout}>Se déconnecter</button>
             </div>
+            <button className="btn btn-primary"  onClick={handleAdd}>
+                + Ajouter
+            </button>
             <button
                 className="btn btn-success"
                 onClick={() => saveBookmarksForUser(auth.currentUser.uid, data.bookmarks)}
@@ -70,7 +79,17 @@ function App() {
                     <Cards selectedTags={selectedTags} />
                 </section>
             </div>*/}
+           {/* {showModal && (
+                <ModalBox
+                    showModal={showModal}
+                    setShowModal={setShowModal}
+                    selectedBookmark={selectedBookmark}
+                    setSelectedBookmark={setSelectedBookmark}
+                    onSave={handleSave}
+                />
+            )}*/}
         </div>
+
     );
 }
 

@@ -1,13 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import { doc, setDoc, addDoc, collection } from "firebase/firestore";
 import { db } from './firebaseConfig';
 
 function ModalBox({ showModal, setShowModal, selectedBookmark, setSelectedBookmark, onSave }) {
-
+    const [errors, setErrors] = useState({});
     const saveBookmark = async () => {
         try {
             let updatedBookmark = { ...selectedBookmark };
+            const newErrors = {};
+            if (!selectedBookmark?.title?.trim()) newErrors.title = "Le titre est obligatoire";
+            if (!selectedBookmark?.url?.trim()) newErrors.url = "L'URL est obligatoire";
+            if (!selectedBookmark?.description?.trim()) newErrors.description = "La description est obligatoire";
+            if (!selectedBookmark?.tags || selectedBookmark.tags.length === 0 || selectedBookmark.tags.every(t => t.trim() === ""))
+                newErrors.tags = "Au moins un tag est obligatoire";
+            if (Object.keys(newErrors).length > 0) {
+                setErrors(newErrors);
+                return; // ← stoppe la sauvegarde
+            }
 
+            setErrors({});
             if (selectedBookmark.id) {
                 // Utiliser setDoc pour créer ou mettre à jour sans jamais planter
                 const docRef = doc(db, "bookmarks", selectedBookmark.id);
@@ -52,27 +63,45 @@ function ModalBox({ showModal, setShowModal, selectedBookmark, setSelectedBookma
                             className="form-control mb-2"
                             value={selectedBookmark?.title || ""}
                             onChange={(e) =>
-                                setSelectedBookmark({ ...selectedBookmark, title: e.target.value })
+                                setSelectedBookmark({...selectedBookmark, title: e.target.value})
                             }
                         />
+                        {errors.title && <div className="text-danger small mb-2">{errors.title}</div>}
+                        <div className="mb-3">
+                            <label htmlFor="message" className="form-label">Message</label>
+                            <textarea
+                                className="form-control"
+                                id="message"
+                                value={selectedBookmark?.description || ""}
+                                onChange={(e) =>
+                                    setSelectedBookmark({ ...selectedBookmark, description: e.target.value })
+                                }
 
+                            />
+                            {errors.description && <div className="text-danger small mb-2">{errors.description}</div>}
+                        </div>
                         <label>URL</label>
                         <input
                             className="form-control mb-2"
                             value={selectedBookmark?.url || ""}
                             onChange={(e) =>
-                                setSelectedBookmark({ ...selectedBookmark, url: e.target.value })
+                                setSelectedBookmark({...selectedBookmark, url: e.target.value})
                             }
                         />
-
+                        {errors.url && <div className="text-danger small mb-2">{errors.url}</div>}
                         <label>Tags (séparés par des virgules)</label>
                         <input
                             className="form-control mb-2"
                             value={(selectedBookmark?.tags || []).join(", ")}
                             onChange={(e) =>
-                                setSelectedBookmark({ ...selectedBookmark, tags: e.target.value.split(",").map(t => t.trim()) })
+                                setSelectedBookmark({
+                                    ...selectedBookmark,
+                                    tags: e.target.value.split(",").map(t => t.trim())
+                                })
                             }
                         />
+                        {errors.tags && <div className="text-danger small mb-2">{errors.tags}</div>}
+
                     </div>
 
                     <div className="modal-footer">
