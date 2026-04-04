@@ -1,27 +1,43 @@
 import React, { useEffect, useState } from "react";
-import { collection, onSnapshot, deleteDoc, doc } from "firebase/firestore";
+import { collection, onSnapshot, deleteDoc, doc, addDoc, query, where } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 import ModalBox from "./ModalBox";
 import Tags from "./Tags";
 import AddModal from "./AddModal";
 import Card from "./card";
+import defaultBookmarks from "./data/data.json"; // ← ajouté
 
 function Dashboard({ user }) {
     const [bookmarks, setBookmarks] = useState([]);
-    const [showModal, setShowModal] = useState(false);
     const [selectedBookmark, setSelectedBookmark] = useState(null);
     const [selectedTags, setSelectedTags] = useState([]);
     const [modalType, setModalType] = useState(null);
-    const filteredBookmarks = selectedTags.length === 0
-        ? bookmarks
-        : bookmarks.filter(b => selectedTags.every(tag => b.tags?.includes(tag)));
+    const [showArchived, setShowArchived] = useState(false);
+
+
+    const filteredBookmarks = bookmarks
+        .filter(b => showArchived ? b.isArchived : !b.isArchived)
+        .filter(b => selectedTags.length === 0 || selectedTags.every(tag => b.tags?.includes(tag)));
+
 
     useEffect(() => {
         if (!user) return;
-        const unsubscribe = onSnapshot(collection(db, "bookmarks"), (snapshot) => {
-            const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-            setBookmarks(data);
+
+        const q = query(
+            collection(db, "bookmarks"),
+            where("userId", "==", user.uid)
+        );
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            if (snapshot.empty) {
+                // ← pas de bookmarks dans Firestore → affiche les données par défaut
+                setBookmarks(defaultBookmarks.bookmarks);
+            } else {
+                const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+                setBookmarks(data);
+            }
         });
+
         return () => unsubscribe();
     }, [user]);
 
@@ -47,19 +63,34 @@ function Dashboard({ user }) {
         catch (error) { console.error("Erreur suppression :", error); }
     };
 
-    const handleSave = (updatedBookmark) => {
-        console.log("Bookmark sauvegardé :", updatedBookmark);
+    const handleSave = async (bookmark) => {
+        try {
+            await addDoc(collection(db, "bookmarks"), {
+                title: bookmark.title,
+                url: bookmark.url,
+                description: bookmark.description,
+                tags: bookmark.tags,
+                favicon: bookmark.image ?? null,
+                userId: user.uid,
+                createdAt: new Date(),
+            });
+            setModalType(null);
+        } catch (error) {
+            console.error("Erreur sauvegarde :", error);
+        }
     };
 
     return (
         <div className="bm-layout">
-
-            {/* SIDEBAR */}
             <aside className="bm-sidebar">
-                <Tags selectedTags={selectedTags} setSelectedTags={setSelectedTags} />
+                <Tags
+                    selectedTags={selectedTags}
+                    setSelectedTags={setSelectedTags}
+                    showArchived={showArchived}
+                    setShowArchived={setShowArchived}  // ← manquait
+                />
             </aside>
 
-            {/* MAIN */}
             <main className="bm-main">
                 <div className="bm-topbar">
                     <h2 className="bm-section-title">All bookmarks</h2>
@@ -75,11 +106,6 @@ function Dashboard({ user }) {
                                 onDelete={handleDelete}
                                 onSave={handleSave}
                             />
-                            {/* Header */}
-
-
-
-
                         </div>
                     ))}
                 </div>

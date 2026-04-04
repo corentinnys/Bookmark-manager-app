@@ -38,11 +38,19 @@ function Card({ card, index,onEdit,onDelete,onSave  }) {
         console.log("Visiter", card.title);
     };
 
+
     return (
         <>
             <div className="bm-head">
-                {card.favicon
-                    ? <img className="bm-favicon" src={card.favicon} alt="" />
+                {card.favicon && typeof card.favicon === "string"
+                    ? <img
+                        className="bm-favicon"
+                        src={card.favicon.startsWith("http")
+                            ? card.favicon
+                            : `/images/${card.favicon}`
+                        }
+                        alt=""
+                    />
                     : <div className="bm-favicon-placeholder">🔖</div>
                 }
                 <div className="bm-meta">
@@ -95,7 +103,7 @@ function Card({ card, index,onEdit,onDelete,onSave  }) {
                                     </span>
                     <span card="bm-stat">
                                         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 2v2M11 2v2M2 7h12"/></svg>
-                        {card.createdAt ?? '—'}
+                        {card.createdAt?.toDate?.()?.toLocaleDateString("fr-FR") ?? '—'}
                                     </span>
                 </div>
                 <button className="bm-bookmark" onClick={() => handleDelete(card.id)}>

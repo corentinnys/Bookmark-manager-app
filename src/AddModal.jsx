@@ -1,28 +1,50 @@
 import React, { useState } from "react";
+import { uploadImage } from "./services/cloudinary"; // ← chemin corrigé
 
-function AddModal({ showModal, setShowModal, selectedBookmark, setSelectedBookmark, onSave,onClose }) {
+function AddModal({ showModal, setShowModal, selectedBookmark, setSelectedBookmark, onSave, onClose }) {
     const [title, setTitle] = useState("");
     const [url, setUrl] = useState("");
     const [description, setDescription] = useState("");
     const [tags, setTags] = useState([]);
     const [preview, setPreview] = useState(null);
-    //if (!show) return null;
+    const [imageFile, setImageFile] = useState(null); // ← ajouté
+    const [uploading, setUploading] = useState(false); // ← ajouté
 
-    const handleSubmit = () => {
-        onSave({ title, url, description, tags,preview });
+    const handleSubmit = async () => {
+        let imageUrl = null;
+
+        if (imageFile) {
+            setUploading(true);
+            try {
+                imageUrl = await uploadImage(imageFile);
+            } catch (err) {
+                console.error("Erreur upload Cloudinary :", err);
+            } finally {
+                setUploading(false);
+            }
+        }
+        /*console.log(import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
+        console.log(import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);*/
+        console.log("imageUrl", imageUrl);
+        onSave({ title, url, description, tags, image: imageUrl });
         onClose();
 
-        // reset (optionnel mais propre)
+        // Reset
         setTitle("");
         setUrl("");
         setDescription("");
         setTags([]);
         setPreview(null);
+        setImageFile(null);
     };
+
     const handleDrop = (e) => {
         e.preventDefault();
-        const file = e.dataTransfer.files[0];
-        if (file) setPreview(URL.createObjectURL(file));
+        const file = e.dataTransfer.files[0]; // ← récupère le fichier droppé
+        if (!file) return;
+
+        setImageFile(file);                          // ← stocke pour l'upload
+        setPreview(URL.createObjectURL(file));       // ← preview local immédiat
     };
 
     return (
@@ -72,22 +94,29 @@ function AddModal({ showModal, setShowModal, selectedBookmark, setSelectedBookma
                             )
                         }
                     />
+
                     <div
                         onDrop={handleDrop}
                         onDragOver={(e) => e.preventDefault()}
-                        style={{ border: "2px dashed gray", padding: 40 }}
+                        style={{ border: "2px dashed gray", padding: 40, textAlign: "center" }}
                     >
                         Glisse une image ici
-                        {preview && <img src={preview} alt="Preview" />}
+                        {preview && (
+                            <img src={preview} alt="Preview" style={{ marginTop: 10, maxWidth: "100%" }} />
+                        )}
                     </div>
 
-                    <div className="d-flex justify-content-end gap-2">
+                    <div className="d-flex justify-content-end gap-2 mt-3">
                         <button className="btn btn-secondary" onClick={onClose}>
                             Annuler
                         </button>
 
-                        <button className="btn btn-primary" onClick={handleSubmit}>
-                            Sauvegarder
+                        <button
+                            className="btn btn-primary"
+                            onClick={handleSubmit}
+                            disabled={uploading}
+                        >
+                            {uploading ? "Upload en cours..." : "Sauvegarder"}
                         </button>
                     </div>
 
