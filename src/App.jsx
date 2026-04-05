@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Auth from "./Auth";
 import { auth } from "./firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import './App.css';
+import './app.css';
 import Dashboard from "./Dashboard";
 
 function App() {
@@ -15,9 +15,10 @@ function App() {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
         });
+
+
+
         return () => unsubscribe();
-        const savedTheme = localStorage.getItem("theme");
-        if (savedTheme) setTheme(savedTheme);
     }, []);
     useEffect(() => {
         document.body.className = theme; // ajoute class="light" ou "dark"

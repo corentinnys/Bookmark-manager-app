@@ -106,7 +106,7 @@ function Card({ card, index,onEdit,onDelete,onSave  }) {
                                         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
                         {card.lastVisited ?? 'Never'}
                                     </span>
-                    <span card="bm-stat">
+                    <span className="bm-stat">
                                         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 2v2M11 2v2M2 7h12"/></svg>
                         {card.createdAt?.toDate?.()?.toLocaleDateString("fr-FR") ?? '—'}
                                     </span>

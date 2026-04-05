@@ -22,7 +22,7 @@ function Dashboard({ user }) {
         .filter(b => selectedTags.length === 0 || selectedTags.every(tag => b.tags?.includes(tag)))
         .filter(b => b.title.toLowerCase().includes(search.toLowerCase()))
             .sort((a, b) => {
-                if (sortType =="reccent")
+                if (sortType ==="reccent")
                 {
                     return new Date(b.createdAt) - new Date(a.createdAt);
                 }
