@@ -33,10 +33,7 @@ function Card({ card, index,onEdit,onDelete,onSave  }) {
         console.log("Supprimer", card.title);
     };
 
-    const handleVisit = (e) => {
-        e.stopPropagation();
-        console.log("Visiter", card.title);
-    };
+
 
 
     return (
@@ -58,7 +55,8 @@ function Card({ card, index,onEdit,onDelete,onSave  }) {
                     <div className="bm-url">{card.url}</div>
                 </div>
 
-                <div className="menu" ref={menuRef}>
+
+                <div className="menu position-relative">
                     <button
                         className="menu-btn"
                         onClick={(e) => {
@@ -70,13 +68,20 @@ function Card({ card, index,onEdit,onDelete,onSave  }) {
                     </button>
 
                     {open && (
-                        <div className="custom-dropdown">
-                            <button onClick={handleEdit}>Modifier</button>
-                            <button onClick={handleDelete}>Supprimer</button>
-                            <button onClick={handleVisit}>Visiter</button>
+                        <div className="dropdown-menu-custom">
+                            <button onClick={(e) => handleEdit(e,card)}>
+                                Modifier
+                            </button>
+
+                            <button onClick={(e) => handleDelete(e,card.id)}>
+                                Supprimer
+                            </button>
+
                         </div>
                     )}
                 </div>
+
+
 
             </div>
             <div className="bm-divider" />

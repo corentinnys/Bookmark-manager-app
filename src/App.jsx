@@ -8,6 +8,7 @@ import Dashboard from "./Dashboard";
 
 function App() {
     const [user, setUser] = useState(null);
+    const [theme, setTheme] = useState("light");
 
     // Surveille l'état de connexion Firebase
     useEffect(() => {
@@ -15,7 +16,13 @@ function App() {
             setUser(currentUser);
         });
         return () => unsubscribe();
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme) setTheme(savedTheme);
     }, []);
+    useEffect(() => {
+        document.body.className = theme; // ajoute class="light" ou "dark"
+        localStorage.setItem("theme", theme);
+    }, [theme]);
 
     const handleLogout = async () => {
         try {
@@ -37,7 +44,13 @@ function App() {
                     Se déconnecter
                 </button>
             </div>
-
+            <div className="app">
+                <button
+                    onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+                >
+                    {theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}
+                </button>
+            </div>
             <Dashboard user={user} />
         </div>
     );

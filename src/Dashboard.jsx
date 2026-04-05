@@ -13,11 +13,30 @@ function Dashboard({ user }) {
     const [selectedTags, setSelectedTags] = useState([]);
     const [modalType, setModalType] = useState(null);
     const [showArchived, setShowArchived] = useState(false);
-
+    const [search, setSearch] = useState("");
+    const [sortType, setSortType] = useState("recent");
+    const [openMenu, setOpenMenu] = useState(false);
 
     const filteredBookmarks = bookmarks
         .filter(b => showArchived ? b.isArchived : !b.isArchived)
-        .filter(b => selectedTags.length === 0 || selectedTags.every(tag => b.tags?.includes(tag)));
+        .filter(b => selectedTags.length === 0 || selectedTags.every(tag => b.tags?.includes(tag)))
+        .filter(b => b.title.toLowerCase().includes(search.toLowerCase()))
+            .sort((a, b) => {
+                if (sortType =="reccent")
+                {
+                    return new Date(b.createdAt) - new Date(a.createdAt);
+                }
+
+                if (sortType === "visited") {
+                    return new Date(b.lastVisited || 0) - new Date(a.lastVisited || 0);
+                }
+
+                if (sortType === "most") {
+                    return (b.visitCount || 0) - (a.visitCount || 0);
+                }
+
+            })
+        ;
 
 
     useEffect(() => {
@@ -80,6 +99,9 @@ function Dashboard({ user }) {
         }
     };
 
+
+
+
     return (
         <div className="bm-layout">
             <aside className="bm-sidebar">
@@ -95,7 +117,50 @@ function Dashboard({ user }) {
                 <div className="bm-topbar">
                     <h2 className="bm-section-title">All bookmarks</h2>
                     <button className="bm-add-btn" onClick={handleAdd}>+ Add Bookmark</button>
+
                 </div>
+                <form className="search-form">
+                    <div className="search-container">
+                        <span className="search-icon">🔍</span>
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search bookmarks..."
+                            className="bm-search"
+                        />
+                    </div>
+                </form>
+
+
+                <div className="menu position-relative">
+                    <button
+                        className="menu-btn"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenMenu(!openMenu);
+                        }}
+                    >
+                        ⋮
+                    </button>
+
+                    {openMenu && (
+                        <div className="dropdown-menu-custom">
+                            <button onClick={() => setSortType("recent")}>
+                                🆕 Recently added
+                            </button>
+
+                            <button onClick={() => setSortType("visited")}>
+                                🕒 Recently visited
+                            </button>
+
+                            <button onClick={() => setSortType("most")}>
+                                🔗 Most visited
+                            </button>
+                        </div>
+                    )}
+                </div>
+
 
                 <div className="bookmarks-grid">
                     {filteredBookmarks.map((bookmark, index) => (
